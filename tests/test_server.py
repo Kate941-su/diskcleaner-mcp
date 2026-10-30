@@ -9,6 +9,13 @@ from diskclean_mcp import trash
 from diskclean_mcp.server import mcp
 
 
+@pytest.fixture(autouse=True)
+def isolated_home(home, monkeypatch):
+    # 実際のホームに依存させない。Windows では tmp_path が ~/AppData 配下にあり、
+    # アプリ管理領域として開発キャッシュが除外されてしまうため
+    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
+
+
 async def call(name: str, **args) -> dict:
     return (await mcp.call_tool(name, args)).structured_content
 
