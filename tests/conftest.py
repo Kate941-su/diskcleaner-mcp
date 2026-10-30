@@ -50,6 +50,7 @@ def tree(home: Path) -> Path:
     make_file(root / "rust" / "target" / "debug" / "app", 3000)
     make_file(root / "docs" / "build" / "keep.txt", 100)  # マーカーなし → 対象外
     make_file(root / "docs" / "target" / "keep.txt", 100)  # マーカーなし → 対象外
+    make_file(root / "py" / "pyproject.toml")
     make_file(root / "py" / ".venv" / "pyvenv.cfg")
     make_file(root / "py" / ".venv" / "lib" / "x.py", 400)
     make_file(root / "py" / "venv" / "notavenv.txt")  # pyvenv.cfg なし → 対象外

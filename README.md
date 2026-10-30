@@ -143,6 +143,7 @@ Disk space is actually freed when you empty the trash.
 - Your home folder itself, and folders directly under the disk root
 - Anything that was not in the list you were shown
 - Symbolic links (and the files they point to)
+- `node_modules` and virtual environments that belong to tools and apps, not to your projects: the pnpm store, Node.js installed by nvm, VS Code extensions, and anything inside `~/Library`, `~/AppData` or hidden folders in your home folder. Removing these would break the tool
 
 `build/` and `dist/` only count as caches when a build file such as `package.json` sits next to them, so normal folders with the same name are not picked up by mistake.
 

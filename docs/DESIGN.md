@@ -36,12 +36,14 @@ MCP SDK は `mcp` 2.x の `mcp.server.mcpserver.MCPServer`（旧 FastMCP）を�
 | 種別 | 条件 |
 |---|---|
 | 開発キャッシュ（名前だけで判定） | `node_modules`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`, `.tox`, `.next`, `.parcel-cache`, `.turbo` |
-| 開発キャッシュ（マーカーが必要） | `target/`: 兄弟に `Cargo.toml` か `pom.xml`<br>`build/`: 兄弟に `build.gradle(.kts)`, `setup.py`, `pyproject.toml`, `CMakeLists.txt`, `package.json` のいずれか<br>`dist/`: 兄弟に `package.json`, `pyproject.toml`, `setup.py` のいずれか<br>`.venv/`, `venv/`: 中に `pyvenv.cfg` がある |
-| 開発キャッシュ（場所を限定） | `~/.gradle/caches`, `~/.cargo/registry`（親ディレクトリには設定ファイルも入っているため） |
+| 開発キャッシュ（マーカーが必要） | `target/`: 兄弟に `Cargo.toml` か `pom.xml`<br>`build/`: 兄弟に `build.gradle(.kts)`, `setup.py`, `pyproject.toml`, `CMakeLists.txt`, `package.json` のいずれか<br>`dist/`: 兄弟に `package.json`, `pyproject.toml`, `setup.py` のいずれか<br>`.venv/`, `venv/`: 中に `pyvenv.cfg` があり、兄弟に `pyproject.toml`, `requirements.txt`, `setup.py`, `setup.cfg`, `Pipfile`, `poetry.lock`, `uv.lock` のいずれかがある |
+| 開発キャッシュ（場所を限定） | `~/.gradle/caches`, `~/.cargo/registry`（親ディレクトリには設定ファイルも入っているため）。下の除外ルールより優先します |
+| 除外（候補にしない） | ホーム直下の隠しディレクトリ（`~/.nvm`, `~/.vscode`, `~/.local` など）、`~/Library`、`~/AppData`、`~/fvm` の中にある開発キャッシュ。pnpm のストア、nvm の npm 本体、VS Code 拡張、アプリ本体の venv などで、消すとツールやアプリが壊れるため<br>このサーバー自身が動いている Python 環境（`sys.prefix`） |
 | 大容量動画 | 拡張子が `.mp4 .mov .mkv .avi .webm .flv .m4v .wmv`、サイズが `min_size_mb` 以上、かつ `max(atime, mtime)` が `unused_days` 日より古い（relatime/noatime 環境では atime が当てにならないため mtime も見る） |
 | 古いログ | ファイル名が正規表現 `\.log(\.\d+)?(\.gz)?$` に一致し、mtime が `older_than_days` 日より古い（`.zip` や `.gz` だけではログとみなさない） |
 
-- 開発キャッシュと判定したディレクトリと `.git` / `.hg` / `.svn` には降りません。
+- 開発キャッシュと判定したディレクトリ、除外した `node_modules` 等や venv、`.git` / `.hg` / `.svn` には降りません。除外したディレクトリの中のログや動画も候補にしません。
+- アプリ管理領域でも、`~/Library/Logs` のような古いログは候補にします（除外は開発キャッシュだけが対象です）。
 - サイズはシンボリックリンクを辿らずに `lstat` の `st_size` を合計しています（ハードリンクは重複して数えます）。
 
 ## 安全設計

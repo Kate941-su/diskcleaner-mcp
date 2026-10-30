@@ -148,3 +148,65 @@ def test_analyze_depth_does_not_change_totals(tree, rules, home):
     assert shallow.total == deep.total
     assert shallow.by_category == deep.by_category
     assert all(deep.children[p] == s for p, s in shallow.children.items())
+
+
+def test_app_managed_areas_are_not_candidates(home, rules):
+    # 前回の実機スキャンで誤検出したもの: 消すと pnpm / npm / VS Code 拡張 / アプリが壊れる
+    make_file(home / "Library" / "pnpm" / "store" / "v11" / "links" / "x" / "node_modules" / "a.js")
+    make_file(home / ".nvm" / "versions" / "node" / "v24" / "lib" / "node_modules" / "npm" / "a")
+    make_file(home / ".vscode" / "extensions" / "ext" / "node_modules" / "a.js")
+    make_file(home / ".hermes" / "agent" / "pyproject.toml")
+    make_file(home / ".hermes" / "agent" / "venv" / "pyvenv.cfg")
+    make_file(home / "AppData" / "Local" / "app" / "node_modules" / "a.js")
+    found, _ = scan(home, criteria("dev_cache"), rules, home=home)
+    assert found == []
+
+
+def test_app_managed_areas_still_report_logs(home, rules):
+    make_file(home / "Library" / "Logs" / "app.log", 100, age_days=60)
+    # アプリ管理領域の node_modules の中には降りない（中のログも候補にしない）
+    make_file(home / ".vscode" / "extensions" / "e" / "node_modules" / "x.log", 100, age_days=60)
+    found, _ = scan(home, criteria("old_logs"), rules, home=home)
+    assert names(found, home) == {"Library/Logs/app.log"}
+
+
+def test_explicit_home_caches_still_reported_inside_hidden_dirs(home, rules):
+    make_file(home / ".gradle" / "caches" / "a.jar", 100)
+    found, _ = scan(home, criteria("dev_cache"), rules, home=home)
+    assert names(found, home) == {".gradle/caches"}
+
+
+def test_venv_requires_project_marker(home, rules):
+    make_file(home / "tool" / ".venv" / "pyvenv.cfg")  # プロジェクト定義なし → 対象外
+    make_file(home / "app" / "requirements.txt")
+    make_file(home / "app" / "venv" / "pyvenv.cfg")
+    found, _ = scan(home, criteria("dev_cache"), rules, home=home)
+    assert names(found, home) == {"app/venv"}
+
+
+def test_active_python_env_is_not_candidate(home, rules, monkeypatch):
+    venv = home / "proj" / ".venv"
+    make_file(home / "proj" / "pyproject.toml")
+    make_file(venv / "pyvenv.cfg")
+    monkeypatch.setattr("diskclean_mcp.patterns.ACTIVE_PREFIX", venv)
+    found, _ = scan(home, criteria("dev_cache"), rules, home=home)
+    assert found == []
+
+
+def test_does_not_descend_into_excluded_venvs(home, rules, monkeypatch):
+    venv = home / "proj" / ".venv"
+    make_file(home / "proj" / "pyproject.toml")
+    make_file(venv / "pyvenv.cfg")
+    make_file(venv / "lib" / "site-packages" / "pkg" / "__pycache__" / "m.pyc", 50)
+    make_file(home / "tool" / "venv" / "pyvenv.cfg")  # プロジェクト定義なし
+    make_file(home / "tool" / "venv" / "lib" / "pkg" / "__pycache__" / "m.pyc", 50)
+    monkeypatch.setattr("diskclean_mcp.patterns.ACTIVE_PREFIX", venv)
+    found, _ = scan(home, criteria("dev_cache"), rules, home=home)
+    assert found == []
+
+
+def test_sdk_manager_dirs_are_app_managed(home, rules):
+    make_file(home / "fvm" / "versions" / "3.0" / "packages" / "tools" / "build" / "x", 10)
+    make_file(home / "fvm" / "versions" / "3.0" / "packages" / "tools" / "package.json")
+    found, _ = scan(home, criteria("dev_cache"), rules, home=home)
+    assert found == []

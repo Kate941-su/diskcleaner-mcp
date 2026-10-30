@@ -13,7 +13,7 @@ from pathlib import Path
 
 from .guard import protection_reason
 from .models import ItemKind, TargetType
-from .patterns import SKIP_DESCEND, is_dev_cache_dir, is_log, is_video
+from .patterns import SKIP_DESCEND, is_dev_cache_dir, is_log, is_opaque_dir, is_video
 from .platform_paths import ProtectionRules
 
 DAY = 86400
@@ -124,6 +124,9 @@ def scan(
                     if criteria.wants("dev_cache"):
                         size = dir_size(path, stats, deadline)
                         found.append(Candidate(path, "dev_cache", size, st.st_mtime, st.st_atime))
+                    continue
+                if is_opaque_dir(path):
+                    # アプリ管理領域の node_modules や使用中の venv。候補にしないが中身も対象外
                     continue
                 stack.append(path)
             elif stat.S_ISREG(st.st_mode):
