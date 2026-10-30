@@ -81,8 +81,11 @@ def test_symlinks_are_not_followed(tmp_path, home, rules):
     assert found == []
 
 
-def test_timeout_marks_result(tree, rules, home):
-    _, stats = scan(tree, criteria("all"), rules, home=home, timeout_sec=1e-9)
+def test_timeout_marks_result(tree, rules, home, monkeypatch):
+    # Python 3.12 以前の Windows は monotonic の分解能が約15.6ms。呼ぶたびに進む時計に差し替える
+    ticks = iter(range(1_000_000))
+    monkeypatch.setattr("diskclean_mcp.scanner.time.monotonic", lambda: next(ticks))
+    _, stats = scan(tree, criteria("all"), rules, home=home, timeout_sec=0.5)
     assert stats.timed_out
 
 
