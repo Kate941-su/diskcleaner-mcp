@@ -1,0 +1,61 @@
+{
+  "manifest_version": "0.4",
+  "name": "diskclean-mcp-server",
+  "display_name": "Disk Clean",
+  "version": "0.1.0",
+  "description": "Find dev caches, large unused videos and old logs, then move approved items to the OS trash.",
+  "long_description": "Ask Claude to free up disk space. It scans for node_modules and other build caches, large videos you have not opened in months, and stale log files, shows you the list, and moves only the items you approve to the OS trash so you can restore them. System folders are always protected.",
+  "author": {
+    "name": "Kaito Kitaya",
+    "email": "kworkshere@gmail.com",
+    "url": "https://github.com/Kate941-su"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kate941-su/diskcleaner-mcp"
+  },
+  "homepage": "https://github.com/Kate941-su/diskcleaner-mcp",
+  "support": "https://github.com/Kate941-su/diskcleaner-mcp/issues",
+  "server": {
+    "type": "uv",
+    "entry_point": "src/diskclean_mcp/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "--no-dev", "diskclean-mcp-server"]
+    }
+  },
+  "tools": [
+    {
+      "name": "get_os_env_paths",
+      "description": "List the usual cache and log folders on this OS"
+    },
+    {
+      "name": "analyze_disk_usage",
+      "description": "Show what is using space under a folder, by category and subfolder"
+    },
+    {
+      "name": "scan_cleanup_targets",
+      "description": "Find cleanup candidates without deleting anything (dry run)"
+    },
+    {
+      "name": "move_to_trash",
+      "description": "Move approved items from a scan to the OS trash"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "cleanup_workflow",
+      "description": "Guide a safe scan, review and trash workflow",
+      "arguments": ["target_path"],
+      "text": "Free up disk space with the diskclean tools. Target: ${arguments.target_path}"
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.12"
+    }
+  },
+  "keywords": ["disk", "cleanup", "cache", "node_modules", "storage"],
+  "license": "MIT"
+}

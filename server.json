@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Kate941-su/diskclean-mcp-server",
+  "title": "Disk Clean",
+  "description": "Find dev caches, large unused videos and old logs, then move approved items to the OS trash.",
+  "repository": {
+    "url": "https://github.com/Kate941-su/diskcleaner-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "diskclean-mcp-server",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

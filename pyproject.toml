@@ -1,0 +1,64 @@
+[project]
+name = "diskclean-mcp-server"
+version = "0.1.0"
+description = "MCP server that finds dev caches, large unused videos and old logs, and moves them to the OS trash after your approval"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Kaito Kitaya", email = "kworkshere@gmail.com" }
+]
+keywords = ["mcp", "model-context-protocol", "disk-cleanup", "node_modules", "cache", "claude"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Filesystems",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=2.3,<3",
+    "pydantic>=2.14.2",
+    "send2trash>=2.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Kate941-su/diskcleaner-mcp"
+Repository = "https://github.com/Kate941-su/diskcleaner-mcp"
+Issues = "https://github.com/Kate941-su/diskcleaner-mcp/issues"
+
+[project.scripts]
+diskclean-mcp-server = "diskclean_mcp.server:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "diskclean_mcp"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+    "ruff>=0.17.3",
+]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
